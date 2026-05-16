@@ -34,3 +34,36 @@ class ParsedNote:
     body: str = ""
     chunks: list[ParsedChunk] = field(default_factory=list)
     parse_status: str = "ok"
+
+
+@dataclass(frozen=True)
+class SearchRequest:
+    query_text: str
+    thread_id: str | None = None
+    filters: dict[str, list[str]] = field(default_factory=dict)
+    sort_mode: str = "relevance"
+    limit: int = 10
+
+
+@dataclass(frozen=True)
+class SearchResult:
+    evidence_id: str
+    note_id: str
+    chunk_id: str
+    title: str
+    path: str
+    section_path: list[str]
+    excerpt: str
+    retrieval_score: float
+    retrieval_mode: str
+    updated_at: str | None
+    file_mtime: str
+    provenance: dict[str, str | None]
+    score_explanation: dict[str, float]
+    sort_fields: dict[str, str | None]
+
+
+@dataclass(frozen=True)
+class SearchResponse:
+    query_id: str
+    results: list[SearchResult]
