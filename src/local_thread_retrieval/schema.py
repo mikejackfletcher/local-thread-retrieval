@@ -86,3 +86,40 @@ class EvidenceRecord:
     file_mtime: str
     retrieval_score: float
     retrieval_mode: str
+
+
+@dataclass(frozen=True)
+class ThreadRecord:
+    thread_id: str
+    title: str
+    created_at: str
+    updated_at: str
+    status: str
+    summary: str | None = None
+
+
+@dataclass(frozen=True)
+class ThreadMessageRecord:
+    message_id: str
+    thread_id: str
+    role: str
+    content: str
+    created_at: str
+
+
+@dataclass(frozen=True)
+class PinnedEvidenceRecord:
+    pin_id: str
+    thread_id: str
+    evidence_id: str
+    pinned_at: str
+    pin_reason: str | None = None
+
+
+@dataclass(frozen=True)
+class ThreadSummaryRecord:
+    synthesis_id: str
+    thread_id: str
+    content: str
+    evidence_ids: list[str]
+    created_at: str
