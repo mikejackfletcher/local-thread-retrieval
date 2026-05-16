@@ -145,13 +145,18 @@ def _ingest_markdown_file(
             ),
         )
 
-    for target in parsed.wikilinks:
+    for link in parsed.links:
         connection.execute(
             """
             INSERT OR IGNORE INTO links (link_id, note_id, target, link_type)
-            VALUES (?, ?, ?, 'wikilink')
+            VALUES (?, ?, ?, ?)
             """,
-            (_stable_id("link", note_id, target, "wikilink"), note_id, target),
+            (
+                _stable_id("link", note_id, link.target, link.link_type),
+                note_id,
+                link.target,
+                link.link_type,
+            ),
         )
 
     for key, value in sorted(parsed.front_matter.items()):

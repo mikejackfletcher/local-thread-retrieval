@@ -17,11 +17,18 @@ class ParsedChunk:
 
 
 @dataclass(frozen=True)
+class ParsedLink:
+    target: str
+    link_type: str
+
+
+@dataclass(frozen=True)
 class ParsedNote:
     title: str
     front_matter: dict[str, Any] = field(default_factory=dict)
     tags: list[str] = field(default_factory=list)
     wikilinks: list[str] = field(default_factory=list)
+    links: list[ParsedLink] = field(default_factory=list)
     created_at: datetime | None = None
     updated_at: datetime | None = None
     body: str = ""
