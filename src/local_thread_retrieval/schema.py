@@ -67,3 +67,22 @@ class SearchResult:
 class SearchResponse:
     query_id: str
     results: list[SearchResult]
+
+
+@dataclass(frozen=True)
+class EvidenceRecord:
+    evidence_id: str
+    note_id: str
+    chunk_id: str
+    path: str
+    title: str
+    source_root: str
+    section_path: list[str]
+    heading: str | None
+    excerpt: str
+    excerpt_char_start: int
+    excerpt_char_end: int
+    updated_at: str | None
+    file_mtime: str
+    retrieval_score: float
+    retrieval_mode: str

@@ -65,17 +65,60 @@ CREATE TABLE IF NOT EXISTS links (
 CREATE TABLE IF NOT EXISTS evidence (
     evidence_id TEXT PRIMARY KEY,
     note_id TEXT NOT NULL,
-    chunk_id TEXT,
+    chunk_id TEXT NOT NULL,
     path TEXT NOT NULL,
     title TEXT NOT NULL,
+    source_root TEXT NOT NULL,
     section_path TEXT NOT NULL,
+    heading TEXT,
     excerpt TEXT NOT NULL,
+    excerpt_char_start INTEGER NOT NULL,
+    excerpt_char_end INTEGER NOT NULL,
     updated_at TEXT,
+    file_mtime TEXT NOT NULL,
     retrieval_score REAL NOT NULL,
     retrieval_mode TEXT NOT NULL CHECK (retrieval_mode IN ('keyword', 'hybrid', 'semantic')),
     FOREIGN KEY (note_id) REFERENCES notes(note_id) ON DELETE CASCADE,
     FOREIGN KEY (chunk_id) REFERENCES chunks(chunk_id) ON DELETE CASCADE
 );
+
+CREATE TRIGGER IF NOT EXISTS evidence_excerpt_insert_guard
+BEFORE INSERT ON evidence
+BEGIN
+    SELECT CASE
+        WHEN NEW.excerpt_char_start < 0
+            THEN RAISE(ABORT, 'evidence excerpt start must be non-negative')
+        WHEN NEW.excerpt_char_end <= NEW.excerpt_char_start
+            THEN RAISE(ABORT, 'evidence excerpt end must be greater than start')
+        WHEN length(NEW.excerpt) > 500
+            THEN RAISE(ABORT, 'evidence excerpt exceeds 500 characters')
+        WHEN NEW.excerpt != (
+            SELECT substr(text, NEW.excerpt_char_start + 1, NEW.excerpt_char_end - NEW.excerpt_char_start)
+            FROM chunks
+            WHERE chunk_id = NEW.chunk_id
+        )
+            THEN RAISE(ABORT, 'evidence excerpt must be contiguous chunk text')
+    END;
+END;
+
+CREATE TRIGGER IF NOT EXISTS evidence_excerpt_update_guard
+BEFORE UPDATE ON evidence
+BEGIN
+    SELECT CASE
+        WHEN NEW.excerpt_char_start < 0
+            THEN RAISE(ABORT, 'evidence excerpt start must be non-negative')
+        WHEN NEW.excerpt_char_end <= NEW.excerpt_char_start
+            THEN RAISE(ABORT, 'evidence excerpt end must be greater than start')
+        WHEN length(NEW.excerpt) > 500
+            THEN RAISE(ABORT, 'evidence excerpt exceeds 500 characters')
+        WHEN NEW.excerpt != (
+            SELECT substr(text, NEW.excerpt_char_start + 1, NEW.excerpt_char_end - NEW.excerpt_char_start)
+            FROM chunks
+            WHERE chunk_id = NEW.chunk_id
+        )
+            THEN RAISE(ABORT, 'evidence excerpt must be contiguous chunk text')
+    END;
+END;
 
 CREATE TABLE IF NOT EXISTS threads (
     thread_id TEXT PRIMARY KEY,
