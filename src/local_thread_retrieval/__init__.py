@@ -8,6 +8,14 @@ from .backlog import (
 from .db import connect_database, init_database
 from .evidence import create_evidence_from_chunk, get_evidence
 from .ingest import list_sources, register_source, rescan_source
+from .invariants import (
+    InvariantViolation,
+    assert_invariants,
+    deterministic_rebuild_snapshot,
+    row_counts,
+    source_derived_snapshot,
+    validate_invariants,
+)
 from .retrieval import search
 from .schema import (
     BacklogEvidenceLinkRecord,
@@ -37,6 +45,7 @@ __all__ = [
     "BacklogHistoryRecord",
     "BacklogItemRecord",
     "EvidenceRecord",
+    "InvariantViolation",
     "PinnedEvidenceRecord",
     "SearchRequest",
     "SearchResponse",
@@ -45,10 +54,12 @@ __all__ = [
     "ThreadRecord",
     "ThreadSummaryRecord",
     "add_thread_message",
+    "assert_invariants",
     "connect_database",
     "create_backlog_item",
     "create_thread",
     "create_evidence_from_chunk",
+    "deterministic_rebuild_snapshot",
     "get_backlog_item",
     "get_thread",
     "get_evidence",
@@ -61,7 +72,10 @@ __all__ = [
     "pin_evidence",
     "register_source",
     "rescan_source",
+    "row_counts",
     "search",
+    "source_derived_snapshot",
     "store_thread_summary",
     "transition_backlog_status",
+    "validate_invariants",
 ]
