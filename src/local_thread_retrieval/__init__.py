@@ -1,8 +1,18 @@
+from .backlog import (
+    create_backlog_item,
+    get_backlog_item,
+    list_backlog_evidence_links,
+    list_backlog_history,
+    transition_backlog_status,
+)
 from .db import connect_database, init_database
 from .evidence import create_evidence_from_chunk, get_evidence
 from .ingest import list_sources, register_source, rescan_source
 from .retrieval import search
 from .schema import (
+    BacklogEvidenceLinkRecord,
+    BacklogHistoryRecord,
+    BacklogItemRecord,
     EvidenceRecord,
     PinnedEvidenceRecord,
     SearchRequest,
@@ -23,6 +33,9 @@ from .threads import (
 )
 
 __all__ = [
+    "BacklogEvidenceLinkRecord",
+    "BacklogHistoryRecord",
+    "BacklogItemRecord",
     "EvidenceRecord",
     "PinnedEvidenceRecord",
     "SearchRequest",
@@ -33,11 +46,15 @@ __all__ = [
     "ThreadSummaryRecord",
     "add_thread_message",
     "connect_database",
+    "create_backlog_item",
     "create_thread",
     "create_evidence_from_chunk",
+    "get_backlog_item",
     "get_thread",
     "get_evidence",
     "init_database",
+    "list_backlog_evidence_links",
+    "list_backlog_history",
     "list_pinned_evidence",
     "list_sources",
     "list_thread_messages",
@@ -46,4 +63,5 @@ __all__ = [
     "rescan_source",
     "search",
     "store_thread_summary",
+    "transition_backlog_status",
 ]

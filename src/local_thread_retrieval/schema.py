@@ -123,3 +123,35 @@ class ThreadSummaryRecord:
     content: str
     evidence_ids: list[str]
     created_at: str
+
+
+@dataclass(frozen=True)
+class BacklogItemRecord:
+    backlog_id: str
+    thread_id: str | None
+    title: str
+    description: str
+    status: str
+    priority: str
+    action_type: str
+    confidence: float
+    requires_confirmation: bool
+    created_at: str
+    updated_at: str
+
+
+@dataclass(frozen=True)
+class BacklogEvidenceLinkRecord:
+    link_id: str
+    backlog_id: str
+    evidence_id: str
+    link_type: str
+
+
+@dataclass(frozen=True)
+class BacklogHistoryRecord:
+    history_id: str
+    backlog_id: str
+    from_status: str | None
+    to_status: str
+    changed_at: str
