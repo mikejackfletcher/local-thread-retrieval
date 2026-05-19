@@ -70,6 +70,15 @@ class SearchResponse:
 
 
 @dataclass(frozen=True)
+class RelatedNoteResult:
+    related_note_id: str
+    path: str
+    title: str
+    relation_types: list[str]
+    relation_score: float
+
+
+@dataclass(frozen=True)
 class EvidenceRecord:
     evidence_id: str
     note_id: str

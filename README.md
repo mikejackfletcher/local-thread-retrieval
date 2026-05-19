@@ -32,4 +32,6 @@ It is not:
 - a hidden-memory assistant
 
 See:
+- `docs/architectural-reasoning-layer.md`
+- `docs/project-brief.md`
 - `docs/spec-v1.md`

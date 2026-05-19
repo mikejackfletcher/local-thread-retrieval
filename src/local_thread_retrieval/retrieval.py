@@ -6,7 +6,7 @@ import sqlite3
 import uuid
 from collections import Counter
 
-from .schema import SearchRequest, SearchResponse, SearchResult
+from .schema import RelatedNoteResult, SearchRequest, SearchResponse, SearchResult
 
 
 NAMESPACE = uuid.UUID("1536ae6f-1142-49a4-b9d7-64fd34a7e4e9")
@@ -18,6 +18,7 @@ FIELD_WEIGHTS = {
     "front_matter": 2.0,
     "chunk_text": 1.0,
 }
+RELATION_TYPE_ORDER = ("shared_wikilink", "backlink", "shared_tag")
 
 
 def search(connection: sqlite3.Connection, request: SearchRequest) -> SearchResponse:
@@ -80,6 +81,79 @@ def search(connection: sqlite3.Connection, request: SearchRequest) -> SearchResp
     return SearchResponse(query_id=query_id, results=candidates[: request.limit])
 
 
+def related_notes(
+    connection: sqlite3.Connection,
+    note_id: str,
+    *,
+    limit: int = 10,
+) -> list[RelatedNoteResult]:
+    if limit < 1:
+        raise ValueError("limit must be greater than zero")
+    source = _note_row(connection, note_id)
+    if source is None:
+        raise ValueError(f"note does not exist: {note_id}")
+
+    source_tags = set(json.loads(source["tags"]))
+    source_wikilinks = set(json.loads(source["wikilinks"]))
+    source_link_targets = {
+        source["title"],
+        source["path"],
+        source["path"].rsplit(".", 1)[0],
+    }
+    results: list[RelatedNoteResult] = []
+    for candidate in connection.execute(
+        """
+        SELECT note_id, path, title, tags, wikilinks
+        FROM notes
+        WHERE note_id != ? AND parse_status = 'ok'
+        ORDER BY path
+        """,
+        (note_id,),
+    ).fetchall():
+        candidate_tags = set(json.loads(candidate["tags"]))
+        candidate_wikilinks = set(json.loads(candidate["wikilinks"]))
+        relation_types: list[str] = []
+        score = 0.0
+
+        shared_wikilinks = source_wikilinks.intersection(candidate_wikilinks)
+        if shared_wikilinks:
+            relation_types.append("shared_wikilink")
+            score += 2.0 * len(shared_wikilinks)
+
+        if candidate_wikilinks.intersection(source_link_targets):
+            relation_types.append("backlink")
+            score += 3.0
+
+        shared_tags = source_tags.intersection(candidate_tags)
+        if shared_tags:
+            relation_types.append("shared_tag")
+            score += 1.0 * len(shared_tags)
+
+        if relation_types:
+            results.append(
+                RelatedNoteResult(
+                    related_note_id=candidate["note_id"],
+                    path=candidate["path"],
+                    title=candidate["title"],
+                    relation_types=[
+                        relation_type
+                        for relation_type in RELATION_TYPE_ORDER
+                        if relation_type in relation_types
+                    ],
+                    relation_score=score,
+                )
+            )
+
+    results.sort(
+        key=lambda result: (
+            -result.relation_score,
+            result.path,
+            result.related_note_id,
+        )
+    )
+    return results[:limit]
+
+
 def _candidate_rows(connection: sqlite3.Connection) -> list[sqlite3.Row]:
     return connection.execute(
         """
@@ -102,6 +176,17 @@ def _candidate_rows(connection: sqlite3.Connection) -> list[sqlite3.Row]:
         ORDER BY notes.path, chunks.chunk_index
         """
     ).fetchall()
+
+
+def _note_row(connection: sqlite3.Connection, note_id: str) -> sqlite3.Row | None:
+    return connection.execute(
+        """
+        SELECT note_id, path, title, tags, wikilinks
+        FROM notes
+        WHERE note_id = ? AND parse_status = 'ok'
+        """,
+        (note_id,),
+    ).fetchone()
 
 
 def _score_row(row: sqlite3.Row, query_tokens: list[str]) -> dict[str, float]:

@@ -238,7 +238,12 @@ def _full_state(tmp_path):
     source = _write_vault(tmp_path)
     connection = _indexed_connection(tmp_path / "local.db", source)
     chunk_rows = connection.execute(
-        "SELECT * FROM chunks ORDER BY chunk_index, chunk_id"
+        """
+        SELECT chunks.*
+        FROM chunks
+        JOIN notes ON notes.note_id = chunks.note_id
+        ORDER BY notes.path, chunks.chunk_index
+        """
     ).fetchall()
     evidence_ids = [
         create_evidence_from_chunk(connection, row["chunk_id"]).evidence_id

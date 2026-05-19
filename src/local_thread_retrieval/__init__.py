@@ -7,6 +7,7 @@ from .backlog import (
 )
 from .db import connect_database, init_database
 from .evidence import create_evidence_from_chunk, get_evidence
+from .frame import assemble_chatgpt_frame
 from .ingest import list_sources, register_source, rescan_source
 from .invariants import (
     InvariantViolation,
@@ -16,13 +17,14 @@ from .invariants import (
     source_derived_snapshot,
     validate_invariants,
 )
-from .retrieval import search
+from .retrieval import related_notes, search
 from .schema import (
     BacklogEvidenceLinkRecord,
     BacklogHistoryRecord,
     BacklogItemRecord,
     EvidenceRecord,
     PinnedEvidenceRecord,
+    RelatedNoteResult,
     SearchRequest,
     SearchResponse,
     SearchResult,
@@ -47,6 +49,7 @@ __all__ = [
     "EvidenceRecord",
     "InvariantViolation",
     "PinnedEvidenceRecord",
+    "RelatedNoteResult",
     "SearchRequest",
     "SearchResponse",
     "SearchResult",
@@ -54,6 +57,7 @@ __all__ = [
     "ThreadRecord",
     "ThreadSummaryRecord",
     "add_thread_message",
+    "assemble_chatgpt_frame",
     "assert_invariants",
     "connect_database",
     "create_backlog_item",
@@ -71,6 +75,7 @@ __all__ = [
     "list_thread_messages",
     "pin_evidence",
     "register_source",
+    "related_notes",
     "rescan_source",
     "row_counts",
     "search",
